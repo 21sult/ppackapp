@@ -21,6 +21,7 @@ sa = gspread.service_account(filename='service_account.json') # Service Account
 wb = sa.open('Banco de Dados PPack')
 ws = wb.worksheet('Banco de Dados')
 df = pd.DataFrame(ws.get_all_records())
+st.write(df)
 
 # Funções
 def df_to_excel(df):
