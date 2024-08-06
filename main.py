@@ -2,10 +2,11 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import gspread
+
 from openpyxl import load_workbook
 from openpyxl.styles import Font, PatternFill
 from io import BytesIO
-from streamlit_gsheets import GSheetsConnection
 
 # Setup
 ## Configurar web page
@@ -16,10 +17,10 @@ st.set_page_config(
 )
 
 ## Conectar ao Google Sheets
-ttl = 60 # time (seconds) it takes for data to be cleared from cache
-conn = st.connection('gsheets', type=GSheetsConnection)
-df = conn.read(ttl=10)
-#st.write(df)
+sa = gspread.service_account(filename='service_account.json') # Service Account
+wb = sa.open('Banco de Dados PPack')
+ws = wb.worksheet('Banco de Dados')
+df = pd.DataFrame(ws.get_all_records())
 
 # Funções
 def df_to_excel(df):
