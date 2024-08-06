@@ -5,7 +5,6 @@ import streamlit as st
 from openpyxl import load_workbook
 from openpyxl.styles import Font, PatternFill
 from io import BytesIO
-from machine_learning import train_models, optimise_price
 from streamlit_gsheets import GSheetsConnection
 
 # Setup
