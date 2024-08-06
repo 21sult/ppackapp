@@ -2,12 +2,20 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import os
 from openpyxl import load_workbook
 from openpyxl.styles import Font, PatternFill
 from io import BytesIO
 from streamlit_gsheets import GSheetsConnection
+from dotenv import load_dotenv
 
 # Setup
+## Carregar environment variables de .env file
+load_dotenv()
+
+## Acessar chave do API do google sheets
+GOOGLE_SHEETS_API_KEY = os.getenv('GOOGLE_SHEETS_API_KEY')
+
 ## Configurar web page
 st.set_page_config(
     page_title = 'Premier Pack - Dashboard',
@@ -17,7 +25,7 @@ st.set_page_config(
 
 ## Conectar ao Google Sheets
 ttl = 60 # time (seconds) it takes for data to be cleared from cache
-conn = st.experimental_connection('gsheets', type=GSheetsConnection)
+conn = st.experimental_connection('gsheets', type=GSheetsConnection, api_key=GOOGLE_SHEETS_API_KEY)
 df = conn.read(ttl=10)
 #st.write(df)
 
