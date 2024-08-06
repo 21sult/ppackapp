@@ -17,7 +17,8 @@ st.set_page_config(
 )
 
 ## Conectar ao Google Sheets
-sa = gspread.service_account(filename='service_account.json') # Service Account
+sa_path=r'C:\Users\vscs1\OneDrive\Documentos\Premier Pack\ppackapp\service_account.json'
+sa = gspread.service_account(filename=r'service_account.json') # Service Account
 wb = sa.open('Banco de Dados PPack')
 ws = wb.worksheet('Banco de Dados')
 df = pd.DataFrame(ws.get_all_records())
