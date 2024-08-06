@@ -1,6 +1,6 @@
-numpy
-pandas
+numpy == 1.26.4
+pandas == 1.5.3
 plotly
 openpyxl
-streamlit
-gspread
+streamlit == 1.22.0
+git+https://github.com/streamlit/gsheets-connection
