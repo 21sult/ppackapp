@@ -3,10 +3,16 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+
 from openpyxl import load_workbook
 from openpyxl.styles import Font, PatternFill
 from io import BytesIO
 from streamlit_gsheets import GSheetsConnection
+
+from sklearn.model_selection import train_test_split
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import LabelEncoder
+
 
 # Setup
 ## Configurar web page
@@ -15,6 +21,7 @@ st.set_page_config(
     page_icon = ':bar_chart:',
     layout = 'wide'
 )
+
 
 ## Conectar ao Google Sheets
 ttl = 60 # time (seconds) it takes for data to be cleared from cache
@@ -55,7 +62,7 @@ df['DATA'] = pd.to_datetime(df['DATA'], format='%Y-%m-%d')
 st.title(':bar_chart: Dashboard Premier Pack')
 
 ## Tabs
-tabs = st.tabs(['Estatísticas', 'Maiores Faturamentos', 'Tabela', 'Baixar Folha'])
+tabs = st.tabs(['Estatísticas', 'Maiores Faturamentos', 'Tabela', 'Baixar Folha', 'Recomendações'])
 
 with tabs[0]:
     # Sidebar
@@ -389,3 +396,21 @@ with tabs[3]:
             
         else:
             st.error('Insira o nome do arquivo.')
+            
+
+with tabs[4]:
+    
+    st.header('Recomendações')
+    
+    # Encode categorical variables
+    label_encoders = {}
+    for column in ['CLIENTE', 'PRODUTO', 'TIPO DE PRODUTO']:
+        le = LabelEncoder()
+        df[column] = le.fit_transform(df[column])
+        label_encoders[column] = le
+        
+
+    # Create client-item interaction matrix
+    user_item_matrix = df.pivot_table(index='CLIENTE', columns='PRODUTO', values='FATURAMENTO', aggfunc='sum').fillna(0)
+    st,write(user_item_matrix)
+    
