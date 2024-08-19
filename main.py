@@ -412,5 +412,5 @@ with tabs[4]:
 
     # Create client-item interaction matrix
     user_item_matrix = df.pivot_table(index='CLIENTE', columns='PRODUTO', values='FATURAMENTO', aggfunc='sum').fillna(0)
-    st,write(user_item_matrix)
+    st.write(user_item_matrix)
     
