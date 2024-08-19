@@ -412,10 +412,10 @@ with tabs[4]:
 
     # Create client-item interaction matrix
     user_item_matrix = df.pivot_table(index='CLIENTE', columns='PRODUTO', values='FATURAMENTO', aggfunc='sum').fillna(0)
-    st.write(user_item_matrix)
     
     # Cosine similarity between different products
     item_similarity = cosine_similarity(user_item_matrix.T)
+    st.write(item_similarity)
     item_similarity_df = pd.DataFrame(item_similarity, index=user_item_matrix.columns, columns=user_item_matrix.columns)
     
     # Generate recommendations
@@ -437,11 +437,11 @@ with tabs[4]:
         ranked_products = sorted(scores.items(), key=lambda x: x[1], reverse=True)
         return ranked_products[:top_n]
     
-    # Exemplo
+    # Example
     client_id = label_encoders['CLIENTE'].transform(['A CASA DO DOCE'])[0]
     recommendations = get_recommendations(client_id, user_item_matrix, item_similarity_df)
     st.write('Top Produtos Recomendados para Cliente:', recommendations)
-    
-    recommended_products = [(label_encoders['PRODUTO'].inverse_transform([prod_id][0], score) for prod_id, score in recommendations)]
+
+    # Corrected code to decode product IDs back to original product names
+    recommended_products = [(label_encoders['PRODUTO'].inverse_transform([prod_id])[0], score) for prod_id, score in recommendations]
     st.write('Produtos:', recommended_products)
-    
