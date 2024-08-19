@@ -445,7 +445,7 @@ with tabs[4]:
 
     # Corrected code to decode product IDs back to original product names
     recommended_products = pd.DataFrame([(label_encoders['PRODUTO'].inverse_transform([prod_id])[0], score) for prod_id, score in recommendations],
-                                        columns = ['PRODUTO', 'PONTUAÇÃO']).
+                                        columns = ['PRODUTO', 'PONTUAÇÃO'])
     
     st.write('Top Produtos Recomendados para ' + option)
     st.write(recommended_products)
