@@ -413,10 +413,9 @@ with tabs[4]:
     # Create client-item interaction matrix
     user_item_matrix = df.pivot_table(index='CLIENTE', columns='PRODUTO', values='FATURAMENTO', aggfunc='sum').fillna(0)
     
-    # Cosine similarity between different products
+    # Cosine similarity matrix between each pair of products
     item_similarity = cosine_similarity(user_item_matrix.T)
-    st.write(item_similarity)
-    item_similarity_df = pd.DataFrame(item_similarity, index=user_item_matrix.columns, columns=user_item_matrix.columns)
+    item_similarity_df = pd.DataFrame(item_similarity, index=user_item_matrix.columns, columns=user_item_matrix.columns) 
     
     # Generate recommendations
     def get_recommendations(client, user_item_matrix, item_similarity_df, top_n=5):
@@ -424,6 +423,7 @@ with tabs[4]:
         # Get products client has already purchased
         client_data = user_item_matrix.loc[client_id]
         client_purchased = client_data[client_data > 0].index.tolist()
+        st.write(client_purchased)
         
         # Calculate scores for products not purchased by client
         scores = {}
