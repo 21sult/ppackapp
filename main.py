@@ -444,7 +444,8 @@ with tabs[4]:
     recommendations = get_recommendations(client_id, user_item_matrix, item_similarity_df)
 
     # Corrected code to decode product IDs back to original product names
-    recommended_products = pd.DataFrame([(label_encoders['PRODUTO'].inverse_transform([prod_id])[0], score) for prod_id, score in recommendations])
+    recommended_products = pd.DataFrame([(label_encoders['PRODUTO'].inverse_transform([prod_id])[0], score) for prod_id, score in recommendations],
+                                        columns = ['PRODUTO', 'PONTUAÇÃO']).
     
     st.write('Top Produtos Recomendados para ' + option)
     st.write(recommended_products)
