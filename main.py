@@ -400,7 +400,7 @@ with tabs[3]:
 
 with tabs[4]:
     
-    st.header('Recomendações')
+    st.header('Recomendações (EM CONSTRUÇÃO)')
     
     # Encode categorical variables
     label_encoders = {}
@@ -413,4 +413,35 @@ with tabs[4]:
     # Create client-item interaction matrix
     user_item_matrix = df.pivot_table(index='CLIENTE', columns='PRODUTO', values='FATURAMENTO', aggfunc='sum').fillna(0)
     st.write(user_item_matrix)
+    
+    # Cosine similarity between different products
+    item_similarity = cosine_similarity(user_item_matrix.T)
+    item_similarity_df = pd.DataFrame(item_similarity, index=user_item_matrix.columns, columns=user_item_matrix.columns)
+    
+    # Generate recommendations
+    def get_recommendations(client, user_item_matrix, item_similarity_df, top_n=5):
+        
+        # Get products client has already purchased
+        client_data = user_item_matrix.loc[client_id]
+        client_purchased = client_data[client_data > 0].index.tolist()
+        
+        # Calculate scores for products not purchased by client
+        scores = {}
+        for product in user_item_matrix.columns:
+            if product not in client_purchased:
+                product_score = sum(item_similarity_df[product][other_product] * client_data[other_product]
+                                    for other_product in client_purchased)
+                scores[product] = product_score
+                
+        # Sort products based on scores
+        ranked_products = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        return ranked_products[:top_n]
+    
+    # Exemplo
+    client_id = label_encoders['CLIENTE'].transform(['A CASA DO DOCE'])[0]
+    recommendations = get_recommendations(client_id, user_item_matrix, item_similarity_df)
+    st.write('Top Produtos Recomendados para Cliente:', recommendations)
+    
+    recommended_products = [(label_encoders['PRODUTO'].inverse_transform([prod_id][0], score) for prod_id, score in recommendations)]
+    st.write('Produtos:', recommended_products)
     
