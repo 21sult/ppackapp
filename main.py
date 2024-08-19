@@ -402,15 +402,16 @@ with tabs[4]:
     
     st.header('Recomendações (EM CONSTRUÇÃO)')
     
-    # Encode categorical variables
+    # Encode categorical
+    df_rec = df.copy()
     label_encoders = {}
     for column in ['CLIENTE', 'PRODUTO', 'TIPO DE PRODUTO']:
         le = LabelEncoder()
-        df[column] = le.fit_transform(df[column])
+        df_rec[column] = le.fit_transform(df_rec[column])
         label_encoders[column] = le
 
     # Create client-item interaction matrix
-    user_item_matrix = df.pivot_table(index='CLIENTE', columns='PRODUTO', values='FATURAMENTO', aggfunc='sum').fillna(0)
+    user_item_matrix = df_rec.pivot_table(index='CLIENTE', columns='PRODUTO', values='FATURAMENTO', aggfunc='sum').fillna(0)
     
     # Cosine similarity matrix between each pair of products
     item_similarity = cosine_similarity(user_item_matrix.T)
