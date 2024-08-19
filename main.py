@@ -18,7 +18,7 @@ st.set_page_config(
 
 ## Conectar ao Google Sheets
 ttl = 60 # time (seconds) it takes for data to be cleared from cache
-conn = st.experimental_connection('gsheets', type=GSheetsConnection)
+conn = st.connection('gsheets', type=GSheetsConnection)
 df = conn.read(ttl=10)
 #st.write(df)
 
