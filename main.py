@@ -449,6 +449,6 @@ with tabs[4]:
     st.write('Top Produtos Recomendados para ' + option)
     i = 0
     for product, score in recommended_products:
-        i++
+        i += 1
         st.write(str(i) + f'. Produto: {product}, Pontuação: {score}')
     
