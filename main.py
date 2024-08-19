@@ -436,18 +436,18 @@ with tabs[4]:
         ranked_products = sorted(scores.items(), key=lambda x: x[1], reverse=True)
         return ranked_products[:top_n]
     
-    # Example
-    client_id = label_encoders['CLIENTE'].transform(['A CASA DO DOCE'])[0]
+    clientes = df['CLIENTE'].unique()
+    st.write(clientes)
+    option = st.selectbox(
+        'Cliente', clientes)
+    
+    client_id = label_encoders['CLIENTE'].transform([option])[0]
     recommendations = get_recommendations(client_id, user_item_matrix, item_similarity_df)
 
     # Corrected code to decode product IDs back to original product names
     recommended_products = [(label_encoders['PRODUTO'].inverse_transform([prod_id])[0], score) for prod_id, score in recommendations]
     
-    st.write('Top Produtos Recomendados para CASA DO DOCE')
+    st.write('Top Produtos Recomendados para...')
     for product, score in recommended_products:
         st.write(f'Produto: {product}, Pontuação: {score}')
     
-    clientes = df['CLIENTE'].unique()
-    st.write(clientes)
-#     option = st.selectbox(
-#         'Cliente', 
