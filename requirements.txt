@@ -3,5 +3,5 @@ pandas == 1.5.3
 plotly
 openpyxl
 streamlit >= 1.32.0
-sklearn
+scikit-learn
 git+https://github.com/streamlit/gsheets-connection
