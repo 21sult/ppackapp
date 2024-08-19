@@ -437,7 +437,6 @@ with tabs[4]:
         return ranked_products[:top_n]
     
     clientes = df['CLIENTE'].unique()
-    st.write(clientes)
     option = st.selectbox(
         'Cliente', clientes)
     
@@ -447,7 +446,9 @@ with tabs[4]:
     # Corrected code to decode product IDs back to original product names
     recommended_products = [(label_encoders['PRODUTO'].inverse_transform([prod_id])[0], score) for prod_id, score in recommendations]
     
-    st.write('Top Produtos Recomendados para...')
+    st.write('Top Produtos Recomendados para ' + option)
+    i = 0
     for product, score in recommended_products:
-        st.write(f'Produto: {product}, Pontuação: {score}')
+        i++
+        st.write(str(i) + f'. Produto: {product}, Pontuação: {score}')
     
