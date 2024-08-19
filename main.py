@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 from openpyxl import load_workbook
 from openpyxl.styles import Font, PatternFill
@@ -188,6 +189,66 @@ with tabs[0]:
     st.subheader(f'Faturamento: R$ {faturamento:,}')
 
     st.markdown('---')
+
+    ## Curva ABC Clientes
+    df_abc_cliente = df_filtered.groupby('CLIENTE').agg({
+        'FATURAMENTO': 'sum',
+        'ABC CLIENTE': 'first'
+    }).sort_values(by='FATURAMENTO', ascending=False).reset_index()
+
+    df_abc_cliente['FAT CUM'] = df_abc_cliente['FATURAMENTO'].cumsum()
+    
+    color_map = {'A': 'yellow', 'B': 'gray', 'C': 'orange'}
+    colors = df_abc_cliente['ABC CLIENTE'].map(color_map)
+    
+    fig_curva_abc_cliente = go.Figure()
+    
+    fig_curva_abc_cliente.add_trace(go.Bar(
+        x = df_abc_cliente['CLIENTE'],
+        y = df_abc_cliente['FAT CUM'],
+        marker_color = colors
+    ))
+    
+    fig_curva_abc_cliente.update_layout(
+        title = 'Curva ABC: Clientes',
+        yaxis_title = 'Faturamento Cumulativo',
+        xaxis_title = 'Cliente',
+        xaxis = dict(showticklabels = False),
+        width = 1000,
+        height = 600,
+    )
+    
+    st.plotly_chart(fig_curva_abc_cliente)
+    
+    ## Curva ABC Produtos
+    df_abc_produto = df_filtered.groupby('PRODUTO').agg({
+        'FATURAMENTO': 'sum',
+        'ABC PRODUTO': 'first'
+    }).sort_values(by='FATURAMENTO', ascending=False).reset_index()
+
+    df_abc_produto['FAT CUM'] = df_abc_produto['FATURAMENTO'].cumsum()
+    
+    color_map = {'A': 'yellow', 'B': 'gray', 'C': 'orange'}
+    colors = df_abc_produto['ABC PRODUTO'].map(color_map)
+    
+    fig_curva_abc_produto = go.Figure()
+    
+    fig_curva_abc_produto.add_trace(go.Bar(
+        x = df_abc_produto['PRODUTO'],
+        y = df_abc_produto['FAT CUM'],
+        marker_color = colors
+    ))
+    
+    fig_curva_abc_produto.update_layout(
+        title = 'Curva ABC: Produtos',
+        yaxis_title = 'Faturamento Cumulativo',
+        xaxis_title = 'Produto',
+        xaxis = dict(showticklabels = False),
+        width = 1000,
+        height = 600,
+    )
+    
+    st.plotly_chart(fig_curva_abc_produto)
 
     ## Top 5 Clientes
     top5_clientes = (
