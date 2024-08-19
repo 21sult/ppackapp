@@ -408,6 +408,7 @@ with tabs[4]:
         le = LabelEncoder()
         df[column] = le.fit_transform(df[column])
         label_encoders[column] = le
+    st.write(label_encoders)
         
 
     # Create client-item interaction matrix
@@ -422,8 +423,7 @@ with tabs[4]:
         
         # Get products client has already purchased
         client_data = user_item_matrix.loc[client_id]
-        client_purchased = client_data[client_data > 0].index.tolist()
-        st.write(client_purchased)
+        client_purchased = client_data[client_data > 0].index.tolist()	# list of products client has purchased
         
         # Calculate scores for products not purchased by client
         scores = {}
