@@ -408,8 +408,6 @@ with tabs[4]:
         le = LabelEncoder()
         df[column] = le.fit_transform(df[column])
         label_encoders[column] = le
-    st.write(label_encoders)
-        
 
     # Create client-item interaction matrix
     user_item_matrix = df.pivot_table(index='CLIENTE', columns='PRODUTO', values='FATURAMENTO', aggfunc='sum').fillna(0)
@@ -440,8 +438,12 @@ with tabs[4]:
     # Example
     client_id = label_encoders['CLIENTE'].transform(['A CASA DO DOCE'])[0]
     recommendations = get_recommendations(client_id, user_item_matrix, item_similarity_df)
-    st.write('Top Produtos Recomendados para Cliente:', recommendations)
+    #st.write('Top Produtos Recomendados para Cliente:', recommendations)
 
     # Corrected code to decode product IDs back to original product names
     recommended_products = [(label_encoders['PRODUTO'].inverse_transform([prod_id])[0], score) for prod_id, score in recommendations]
-    st.write('Produtos:', recommended_products)
+    #st.write('Produtos:', recommended_products)
+    
+    st.write('Top Produtos Recomendados para Cliente')
+    for product, score in recommended_products:
+        st.write(f'Produto: {product}, Pontuação: {score}')
