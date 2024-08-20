@@ -25,7 +25,7 @@ st.set_page_config(
 
 ## Conectar ao Google Sheets
 ttl = 60 # time (seconds) it takes for data to be cleared from cache
-conn = st.connection('gsheets', type=GSheetsConnection)
+conn = st.experimental_connection('gsheets', type=GSheetsConnection)
 df = conn.read(ttl=10)
 #st.write(df)
 
@@ -418,7 +418,7 @@ with tabs[4]:
     item_similarity_df = pd.DataFrame(item_similarity, index=user_item_matrix.columns, columns=user_item_matrix.columns) 
     
     # Generate recommendations
-    def get_recommendations(client, user_item_matrix, item_similarity_df, top_n=5):
+    def get_recommendations(client, user_item_matrix, item_similarity_df, top_n=10):
         
         # Get products client has already purchased
         client_data = user_item_matrix.loc[client_id]
@@ -446,11 +446,9 @@ with tabs[4]:
     # Corrected code to decode product IDs back to original product names
     recommended_products = pd.DataFrame([(label_encoders['PRODUTO'].inverse_transform([prod_id])[0], score) for prod_id, score in recommendations],
                                         columns = ['PRODUTO', 'PONTUAÇÃO'])
+    recommended_products.index = pd.RangeIndex(start=1, stop=len(recommended_products)+1, step=1)
+    recommended_products.index.name = 'Ranking'
     
     st.write('Top Produtos Recomendados para ' + option)
     st.write(recommended_products)
-#     i = 0
-#     for product, score in recommended_products:
-#         i += 1
-#         st.write(str(i) + f'. Produto: {product}, Pontuação: {score}')
     
