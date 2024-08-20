@@ -418,7 +418,7 @@ with tabs[4]:
     item_similarity_df = pd.DataFrame(item_similarity, index=user_item_matrix.columns, columns=user_item_matrix.columns) 
     
     # Generate recommendations
-    def get_recommendations(client, user_item_matrix, item_similarity_df, top_n=10):
+    def get_recommendations(client, user_item_matrix, item_similarity_df, top_n=20):
         
         # Get products client has already purchased
         client_data = user_item_matrix.loc[client_id]
