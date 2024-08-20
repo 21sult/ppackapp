@@ -436,7 +436,7 @@ with tabs[4]:
         ranked_products = sorted(scores.items(), key=lambda x: x[1], reverse=True)
         return ranked_products[:top_n]
     
-    clientes = df['CLIENTE'].unique()
+    clientes = df['CLIENTE'].unique().sort_values()
     option = st.selectbox(
         'Cliente', clientes)
     
