@@ -463,7 +463,6 @@ with tabs[4]:
         
         # Get the corresponding DataFrame with columns for each year giving the quantities sold in that year
         df_with_years = df_rec_copy[df_rec_copy['CLIENTE'] == original_clients]
-        st.write(df_with_years)
         
         # Merge with df_with_years to get quantities for each year
         recommended_products = recommended_products.merge(df_with_years[['PRODUTO', 2022, 2023, 2024]], on='PRODUTO', how='left')
