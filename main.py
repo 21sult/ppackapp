@@ -9,6 +9,8 @@ from openpyxl.styles import Font, PatternFill
 from io import BytesIO
 from streamlit_gsheets import GSheetsConnection
 
+from sklearn.decomposition import TruncatedSVD
+from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import LabelEncoder
@@ -402,8 +404,24 @@ with tabs[4]:
     
     st.header('Recomendações (EM CONSTRUÇÃO)')
     
-    # Encode categorical
+    # --- RECOMMENDATION DATAFRAME --- #
+    # Initial DataFrame
     df_rec = df.copy()
+    df_rec = df_rec[['CLIENTE', 'PRODUTO', 'TIPO DE PRODUTO', 'FATURAMENTO', 'QUANTIDADE', 'ANO']]
+
+    # Group by client, product, product type, year... sum their quantity and faturamento
+    df_rec = df_rec.groupby(['CLIENTE', 'PRODUTO', 'TIPO DE PRODUTO', 'ANO'], as_index=False).agg({'QUANTIDADE': 'sum', 'FATURAMENTO': 'sum'})
+    
+    # Pivot years, where their values are quantity
+    df_rec = df_rec.pivot_table(index=['CLIENTE', 'PRODUTO', 'TIPO DE PRODUTO', 'FATURAMENTO'], columns='ANO', values='QUANTIDADE', fill_value=0).reset_index()
+    
+    # Group by client, product again
+    df_rec = df_rec.groupby(['CLIENTE','PRODUTO','TIPO DE PRODUTO']).agg({'FATURAMENTO':'sum', 2022:'sum', 2023:'sum', 2024:'sum'}).reset_index()
+    
+    df_rec_copy = df_rec.copy()
+    
+    # --- RECOMMENDATION ENGINE --- #
+    # Encode categorical columns
     label_encoders = {}
     for column in ['CLIENTE', 'PRODUTO', 'TIPO DE PRODUTO']:
         le = LabelEncoder()
@@ -412,43 +430,59 @@ with tabs[4]:
 
     # Create client-item interaction matrix
     user_item_matrix = df_rec.pivot_table(index='CLIENTE', columns='PRODUTO', values='FATURAMENTO', aggfunc='sum').fillna(0)
-    
+
     # Cosine similarity matrix between each pair of products
     item_similarity = cosine_similarity(user_item_matrix.T)
-    item_similarity_df = pd.DataFrame(item_similarity, index=user_item_matrix.columns, columns=user_item_matrix.columns) 
-    
+    item_similarity_df = pd.DataFrame(item_similarity, index=user_item_matrix.columns, columns=user_item_matrix.columns)
+
     # Generate recommendations
-    def get_recommendations(client, user_item_matrix, item_similarity_df, top_n=20):
+    def get_recommendations(client_id, user_item_matrix, item_similarity_df, df, label_encoders, top_n=100):
         
         # Get products client has already purchased
         client_data = user_item_matrix.loc[client_id]
-        client_purchased = client_data[client_data > 0].index.tolist()	# list of products client has purchased
+        client_purchased = client_data[client_data > 0].index.tolist()  # list of products client has purchased
         
         # Calculate scores for products not purchased by client
-        scores = {}
+        scores = {} # {product: score}
         for product in user_item_matrix.columns:
-            if product not in client_purchased:
-                product_score = sum(item_similarity_df[product][other_product] * client_data[other_product]
-                                    for other_product in client_purchased)
-                scores[product] = product_score
-                
+            product_score = int(sum(item_similarity_df[product][other_product] * client_data[other_product]
+                                for other_product in client_purchased))
+            scores[product] = product_score
+        
         # Sort products based on scores
         ranked_products = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-        return ranked_products[:top_n]
-    
-    clientes = df['CLIENTE'].sort_values().unique()
-    option = st.selectbox(
-        'Cliente', clientes)
-    
-    client_id = label_encoders['CLIENTE'].transform([option])[0]
-    recommendations = get_recommendations(client_id, user_item_matrix, item_similarity_df)
+        
+        # Decode product IDs back to original product names along with scores
+        original_products = [(label_encoders['PRODUTO'].inverse_transform([prod_id])[0], score) for prod_id, score in ranked_products]
+        
+        # Decode client IDs back to original client names
+        original_clients = label_encoders['CLIENTE'].inverse_transform([client_id])[0]
+        
+        # Make DataFrame with decoded product names and their scores
+        recommended_products = pd.DataFrame(original_products, columns=['PRODUTO', 'PONTUAÇÃO'])
+        
+        # Get the corresponding DataFrame with columns for each year giving the quantities sold in that year
+        df_with_years = df_rec_copy[df_rec_copy['CLIENTE'] == original_clients]
+        st.write(df_with_years)
+        
+        # Merge with df_with_years to get quantities for each year
+        recommended_products = recommended_products.merge(df_with_years[['PRODUTO', 2022, 2023, 2024]], on='PRODUTO', how='left')
 
-    # Corrected code to decode product IDs back to original product names
-    recommended_products = pd.DataFrame([(label_encoders['PRODUTO'].inverse_transform([prod_id])[0], score) for prod_id, score in recommendations],
-                                        columns = ['PRODUTO', 'PONTUAÇÃO'])
-    recommended_products.index = pd.RangeIndex(start=1, stop=len(recommended_products)+1, step=1)
-    recommended_products.index.name = 'Ranking'
-    
+        # Fill NaN values with 0 (or another value if appropriate)
+        recommended_products = recommended_products.fillna(0)
+        
+        # Add ranking index
+        recommended_products.index = pd.RangeIndex(start=1, stop=len(recommended_products) + 1, step=1)
+        recommended_products.index.name = 'Ranking'
+        
+        return recommended_products
+
+    # Select client and generate recommendations
+    clientes = df['CLIENTE'].sort_values().unique()
+    option = st.selectbox('Cliente', clientes)
+
+    client_id = label_encoders['CLIENTE'].transform([option])[0]
+    recommendations = get_recommendations(client_id, user_item_matrix, item_similarity_df, df, label_encoders)
+
     st.write('Top Produtos Recomendados para ' + option)
-    st.write(recommended_products)
-    
+    st.write(recommendations)
